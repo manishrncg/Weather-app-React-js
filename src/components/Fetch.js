@@ -17,7 +17,7 @@ class Fetch extends Component {
   componentWillMount(){  // fetch data from api for whole week
     const lat = this.props.lat;  // latitude
     const lon = this.props.lon;  // longitue
-    fetch("http://api.openweathermap.org/data/2.5/forecast?lat="+lat+"&lon="+lon+"&units=metric&appid=3279b275644f5e71cba5375e72028012")
+    fetch("https://api.openweathermap.org/data/2.5/forecast?lat="+lat+"&lon="+lon+"&units=metric&appid=3279b275644f5e71cba5375e72028012")
       .then(response => {
         if (response.ok) {
           return Promise.resolve(response);
