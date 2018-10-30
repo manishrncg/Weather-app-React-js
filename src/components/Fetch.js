@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import Tab from './Tab';
 
 class Fetch extends Component {
   constructor(props){
@@ -53,86 +54,73 @@ class Fetch extends Component {
 
   showDayWiseWeather(count){
     const a     = this.weatherData;
+    const dateSelected = new Date( a.list[ this.state.clicked * count ].dt_txt ).toString().split(' ')[0];
     let dayData = Object.keys(a.list)
-                  .map( (i) =>  ( new Date( a.list[ this.state.clicked * count ].dt_txt ).toString().split(' ')[0] 
-                                  === ( new Date( a.list[i].dt_txt ) ).toString().split(' ')[0] 
-                                ) 
-                                ?
-                                  ( <div className="col-md-2 col-sm-6 col-xs-6 text-center tab_margin" key={i} >
-                                      <p className="day_Name_grey">
-                                        { new Date( a.list[i].dt_txt ).toString().split(' ')[0] }
-                                      </p>
-                                      <img 
-                                        src={ "http://openweathermap.org/img/w/"+( a.list[i].weather[0].icon )+".png" } 
-                                        alt={ a.list[i].weather[0].main } />
-                                      <p>
-                                        { (a.list[i].main.temp_max).toFixed(1) }°C &nbsp;
-                                        <span className="temp_grey">
-                                          { (a.list[i].main.temp_min).toFixed(1) }°C
-                                        </span>
-                                      </p>
-                                      <p className="text-capitalize">
-                                        { a.list[i].weather[0].description }
-                                      </p>
-                                      <p>
-                                        { a.list[i].dt_txt }
-                                      </p>
-                                    </div> )
-                                : ''
+                  .map( (i) =>  { let currentDay  = new Date( a.list[i].dt_txt ).toString().split(' ')[0];
+                                  if( a.list[i] && (dateSelected === currentDay) ) 
+                                    { 
+                                      return (<Tab 
+                                              classes="col-md-2 col-sm-6 col-xs-6 text-center tab_margin" 
+                                              key={ i }
+                                              day_or_Date={ currentDay }
+                                              img_details={ { src:"http://openweathermap.org/img/w/"+( a.list[i].weather[0].icon )+".png",
+                                                              alt: a.list[i].weather[0].main } }
+                                              temp={ { min: a.list[i].main.temp_min.toFixed(1),
+                                                      max: a.list[i].main.temp_min.toFixed(1) } }
+                                              weather_details={ a.list[i].weather[0].description }
+                                              day_details={ a.list[i].dt_txt.split(' ')[0] } />
+                                              )
+                                     }
+                                    else{
+                                      return '';
+                                    }
+                                  }
                       );
-    return <div>
-            <h3 className="text-center grey-border-1px">
-              { a.city.name + ', ' + a.city.country } 
-              - 
-              { new Date( a.list[this.state.clicked * count].dt_txt ).toString().split(' ')[0] }
-            </h3>
-
-            <p className="text-center" >
-              <b onClick={(e)=>this.fullDay()} className="cursor-pointer color-red" >
-                <span className="leftArrow">&#8592; </span>  
-                Click here to return to weekly weather
-              </b>
-            </p>
-
-            <div className="row">
-            { dayData }
-            </div>
-          </div>;
+    return (<div>
+                <h3 className="text-center grey-border-1px">
+                  { a.city.name + ', ' + a.city.country } 
+                  - 
+                  { new Date( a.list[this.state.clicked * count].dt_txt ).toString().split(' ')[0] }
+                </h3>
+    
+                <p className="text-center" >
+                  <b onClick={(e)=>this.fullDay()} className="cursor-pointer color-red" >
+                    <span className="leftArrow">&#8592; </span>  
+                    Click here to return to weekly weather
+                  </b>
+                </p>
+    
+                <div className="row">
+                { dayData }
+                </div>
+              </div>);
   }
 
+  // count - Array length weather data 
   showWholeWeekWeather(count){
     const a         = this.weatherData;
     const weekData  = [];
     for(let i=0; i<a.list.length; i++)
     {
-      if( i*count >= a.list.length ){ break }
-      let currentDay  = new Date( a.list[ i * count ].dt_txt ).toString().split(' ')[0];
-      let prevDay     = weekData[i-1] ? weekData[i-1].props.children[0].props.children : '';
-      if( currentDay === prevDay ){ continue }
+      if( i*count >= a.list.length ){ break; }
       
-      weekData.push(<div 
-                    className="col-md-2 col-sm-6 col-xs-6 text-center tab_margin tab" 
-                    key={ i*count } 
-                    onClick={ (e) => this.fullDay(i) } >
-                      <p className="day_Name_grey">
-                        { currentDay }
-                      </p>
-                      <img 
-                        src={"http://openweathermap.org/img/w/"+( a.list[i*count].weather[0].icon )+".png"} 
-                        alt={ a.list[i].weather[0].main } />
-                      <p>
-                        { (a.list[i*count].main.temp_max).toFixed(1) }°C &nbsp; 
-                        <span className="temp_grey">
-                          { (a.list[i*count].main.temp_min).toFixed(1) }°C
-                        </span>
-                      </p>
-                      <p className="text-capitalize">
-                        { a.list[i*count].weather[0].description }
-                      </p>
-                      <p>
-                        { a.list[i*count].dt_txt.split(' ')[0] }
-                      </p>
-                    </div>);
+      let currentDay  = new Date( a.list[ i * count ].dt_txt ).toString().split(' ')[0];
+      let prevDay     = weekData[i-1] ? weekData[i-1].props.day_details : '';
+      
+      if( currentDay === prevDay ){ continue; }
+      
+      weekData.push(<Tab 
+                    classes="col-md-2 col-sm-6 col-xs-6 text-center tab_margin tab" 
+                    key={ i*count }
+                    onClick={ (e) => this.fullDay(i) }
+                    day_or_Date={ currentDay }
+                    img_details={ { src:"http://openweathermap.org/img/w/"+( a.list[i*count].weather[0].icon )+".png",
+                                    alt: a.list[i].weather[0].main } }
+                    temp={ { min: (a.list[i*count].main.temp_min).toFixed(1),
+                            max: (a.list[i*count].main.temp_min).toFixed(1) } }
+                    weather_details={ a.list[i*count].weather[0].description }
+                    day_details={ a.list[i*count].dt_txt.split(' ')[0] } />
+                    );
       };
 
       return (<div>
@@ -141,7 +129,7 @@ class Fetch extends Component {
                   &nbsp;- Weekly Weather
                 </h3>
                   <p className="text-center">
-                    <b>Click the day tab to see full forecast</b>
+                    <b>Click below to see full day forecast</b>
                   </p>
                   <div className="row">
                     { weekData }
@@ -158,7 +146,7 @@ class Fetch extends Component {
 
     if(!this.state.day && weatherData.list !== undefined){
       // Data shown on load
-        weatherTabs = this.showWholeWeekWeather(count);
+      weatherTabs = this.showWholeWeekWeather(count);
     }else if(weatherData.list !== undefined){
       // Full day forecast on clicking particular day
       weatherTabs = this.showDayWiseWeather(count);
